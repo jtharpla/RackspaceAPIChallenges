@@ -15,8 +15,7 @@
 #                    username=<cloud account username>
 #                    api_key=<cloud account api key>
 #
-import os, sys
-import pyrax
+import os, pyrax
 
 
 ######################
