@@ -15,20 +15,16 @@
 #                    username=<cloud account username>
 #                    api_key=<cloud account api key>
 #
-import os, pyrax
+import os, sys
+import pyrax
 
 
-######################
-"""
-main stub
-"""
 myservernames = ('web1', 'web2', 'web3')
 myservers = []
 
 # Get the credentials
 pyrax.set_credential_file(os.path.expanduser("~/.rackspace_cloud_credentials"))
 cs = pyrax.cloudservers
-
 
 # Get flavor and image ids
 ubu_image = [img for img in cs.images.list()
@@ -42,22 +38,34 @@ for servername in myservernames:
     try:
         myservers.append(cs.servers.create(servername, ubu_image.id, flavor_512.id))
     except:
-        print "Unable to create server named {}".format(servername)
+        print "ERROR: Unable to create server named " + servername + "\n"
     
 # Now loop through created servers, wait until each finishes building, then
 # display the name, ip address, and admin password
 for server in myservers:
     adminpass = server.adminPass # have to do this before we refresh the server object
     
-    # Wait until server is assigned IP addresses
-    while not server.networks:
-        server = cs.servers.get(server.id)
-        
-    # Retrieve the public IPv4 address
-    publicips = server.networks[u'public']
+    # Wait until server is ACTIVE (but only 30 minutes or 360 attempts @ every 5 secs)
+    pyrax.utils.wait_until(server, 'status', ['ACTIVE', 'ERROR'], attempts=360)
     
-    # Print the details
-    print "{0}: addresses are {1}, and admin password is {2} ".format(server.name, publicips, adminpass, )
+    server = cs.servers.get(server.id) # Refresh server object
+    if server.status == 'ACTIVE' and server.networks:
+        # Server is active and has networks defined    
+        
+        # Retrieve the public IPv4 address
+        publicips = server.networks[u'public']
+    
+        # Print the details
+        print server.name + ":"
+        print "\tIP addresses:", ', '.join(str(ip) for ip in publicips)
+        print "\tAdmin password:", adminpass
+        print 
+    elif server.status == 'ACTIVE' and not server.networks:
+        # Server is active, but no networking, ack!
+        print "ERROR: Server " + server.name + " was created without any networks\n"
+    else:
+        # Server failed to finish building, time to deliver the bad news...
+        print "ERROR: Server " + server.name + " failed to build\n"
 
     
         
