@@ -15,6 +15,18 @@
 #                    username=<cloud account username>
 #                    api_key=<cloud account api key>
 #
+# Copyright 2013 Jeff Tharp
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+# this file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License
+#
 import os, sys
 import pyrax
 
@@ -38,17 +50,15 @@ for servername in myservernames:
     try:
         myservers.append(cs.servers.create(servername, ubu_image.id, flavor_512.id))
     except:
-        print "ERROR: Unable to create server named " + servername + "\n"
+        print >> sys.stderr, "ERROR: Unable to create server named " + servername + "\n"
     
 # Now loop through created servers, wait until each finishes building, then
 # display the name, ip address, and admin password
 for server in myservers:
-    adminpass = server.adminPass # have to do this before we refresh the server object
+    # Wait until server is ACTIVE (but only 30 minutes or 60 attempts @ every 30 secs each)
+    pyrax.utils.wait_until(server, 'status', ['ACTIVE', 'ERROR'], interval=30, attempts=60)
     
-    # Wait until server is ACTIVE (but only 30 minutes or 360 attempts @ every 5 secs)
-    pyrax.utils.wait_until(server, 'status', ['ACTIVE', 'ERROR'], attempts=360)
-    
-    server = cs.servers.get(server.id) # Refresh server object
+    server.get() # Refresh server object
     if server.status == 'ACTIVE' and server.networks:
         # Server is active and has networks defined    
         
@@ -58,14 +68,14 @@ for server in myservers:
         # Print the details
         print server.name + ":"
         print "\tIP addresses:", ', '.join(str(ip) for ip in publicips)
-        print "\tAdmin password:", adminpass
+        print "\tAdmin password:", server.adminPass
         print 
     elif server.status == 'ACTIVE' and not server.networks:
         # Server is active, but no networking, ack!
-        print "ERROR: Server " + server.name + " was created without any networks\n"
+        print >> sys.stderr, "ERROR: Server " + server.name + " was created without any networks\n"
     else:
         # Server failed to finish building, time to deliver the bad news...
-        print "ERROR: Server " + server.name + " failed to build\n"
+        print >> sys.stderr, "ERROR: Server " + server.name + " failed to build\n"
 
     
         

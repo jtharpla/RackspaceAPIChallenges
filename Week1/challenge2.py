@@ -13,6 +13,18 @@
 #                    username=<cloud account username>
 #                    api_key=<cloud account api key>
 #
+# Copyright 2013 Jeff Tharp
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+# this file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License
+#
 import os, sys
 from time import gmtime, strftime
 
@@ -66,22 +78,22 @@ for server in cs.servers.list():
             newimageid = server.create_image(imagename)
             break # We're done, no need to iterate over the rest of the list :-)
         except:
-            print "ERROR: Unable to create image of ", source_servername, "\n"
-            sys.exit(0)
+            print >> sys.stderr, "ERROR: Unable to create image of ", source_servername, "\n"
+            sys.exit(1)
  
 if not newimageid:
-    print "ERROR: Unable to create image of ", source_servername, "\n"
-    sys.exit(0)
+    print >> sys.stderr, "ERROR: Unable to create image of ", source_servername, "\n"
+    sys.exit(1)
 
-# And now we wait...but only for up to a half hour (= 360 attempts @ every 5 secs)
+# And now we wait...but only for up to a half hour (= 60 attempts @ every 30 secs each)
 newimage = cs.images.get(newimageid)
-pyrax.utils.wait_until(newimage, 'status', 'ACTIVE', attempts=360)
-newimage = cs.images.get(newimageid) # Need to refresh to update status
+pyrax.utils.wait_until(newimage, 'status', 'ACTIVE', interval=30, attempts=60)
+newimage.get() # Need to refresh to update status
 
 # Abort if we do not have a good image
 if newimage.status != 'ACTIVE':
-    print "ERROR: Creation of image named ", imagename, " failed\n"
-    sys.exit(0)
+    print >> sys.stderr, "ERROR: Creation of image named ", imagename, " failed\n"
+    sys.exit(1)
 
 # Get flavor of the source server
 source_flavor = server.flavor['id']
@@ -91,15 +103,12 @@ try:
     print "Creating clone of {0} named {1}...\n".format(source_servername, clone_servername)
     clone_server = cs.servers.create(clone_servername, newimageid, source_flavor)
 except:
-    print "ERROR: Unable to create server named " + clone_servername + "\n"
+    print >> sys.stderr, "ERROR: Unable to create server named " + clone_servername + "\n"
     
-# Wait until server finishes building, then display the details
-adminpass = clone_server.adminPass # have to do this before we refresh the server object
-    
-# Wait until server is ACTIVE/ERROR (but only 30 minutes or 360 attempts @ every 5 secs)
-pyrax.utils.wait_until(clone_server, 'status', ['ACTIVE', 'ERROR'], attempts=360)
+# Wait until server is ACTIVE/ERROR (but only 30 minutes or 60 attempts @ every 30 secs each)
+pyrax.utils.wait_until(clone_server, 'status', ['ACTIVE', 'ERROR'], interval=30, attempts=60)
 
-clone_server = cs.servers.get(clone_server.id) # Refresh server object
+clone_server.get() # Refresh server object
 if clone_server.status == 'ACTIVE' and clone_server.networks:
     # Server is active and has networks defined    
     
@@ -109,14 +118,14 @@ if clone_server.status == 'ACTIVE' and clone_server.networks:
     # Print the details
     print clone_servername + ":"
     print "\tIP addresses:", ', '.join(str(ip) for ip in publicips)
-    print "\tAdmin password:", adminpass
+    print "\tAdmin password:", clone_server.adminPass
     print 
 elif clone_server.status == 'ACTIVE' and not clone_server.networks:
     # Server is active, but no networking, ack!
-    print "ERROR: Server " + clone_servername + " was created without any networks\n"
+    print >> sys.stderr, "ERROR: Server " + clone_servername + " was created without any networks\n"
 else:
     # Server failed to finish building, time to deliver the bad news...
-    print "ERROR: Server " + clone_servername + " failed to build\n"
+    print >> sys.stderr, "ERROR: Server " + clone_servername + " failed to build\n"
 
     
         
