@@ -30,20 +30,17 @@
 # CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License
 #
-import os, sys, time
+import os, sys, time, argparse
 import pyrax
 
-if len(sys.argv) < 2:
-    # Check that required number of arguments have been supplied
-    print >> sys.stderr, "Usage: {} SOURCEFOLDERPATH DESTCONTAINER\n".format(sys.argv[0])
-    sys.exit(1)
+parser = argparse.ArgumentParser(description="Upload contents of a folder to a Cloud Files container")
+parser.add_argument("sourcefolderpath", help="Path to the local source folder")
+parser.add_argument("destcontainername", help="Name of Cloud Files container (will create if does not exist)")
+args = parser.parse_args()
 
-source_folderpath = sys.argv[1]
-dest_containername = sys.argv[2]
-
-if not os.path.exists(source_folderpath):
+if not os.path.exists(args.sourcefolderpath):
     # Check that this is a valid path (will also fail if we don't have permissions)
-    print >> sys.stderr, "ERROR: {} does not exist or is not accessible\n".format(source_folderpath)
+    print >> sys.stderr, "ERROR: {} does not exist or is not accessible\n".format(args.sourcefolderpath)
     sys.exit(1)
 
 # Get the credentials
@@ -51,11 +48,11 @@ pyrax.set_credential_file(os.path.expanduser("~/.rackspace_cloud_credentials"))
 cf = pyrax.cloudfiles
 
 # Start the upload (asynchronously)
-print "Uploading {0} to container \"{1}\"...".format(source_folderpath, dest_containername)
+print "Uploading {0} to container \"{1}\"...".format(args.sourcefolderpath, args.destcontainername)
 try:
-    upload_key, total_bytes = cf.upload_folder(source_folderpath, dest_containername)
+    upload_key, total_bytes = cf.upload_folder(args.sourcefolderpath, args.destcontainername)
 except:
-    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"".format(source_folderpath, dest_containername)
+    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"".format(args.sourcefolderpath, args.destcontainername)
     sys.exit(1)
  
 # Monitor and report progress of upload.. 
@@ -68,7 +65,7 @@ while uploaded_bytes < total_bytes:
     
 if uploaded_bytes == total_bytes:
     # One more check, make sure all the bits got there
-    print "Upload of {0} to container \"{1}\" complete!".format(source_folderpath, dest_containername)
+    print "Upload of {0} to container \"{1}\" complete!".format(args.sourcefolderpath, args.destcontainername)
 else:
-    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"".format(source_folderpath, dest_containername)
+    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"".format(args.sourcefolderpath, args.destcontainername)
     sys.exit(1)
