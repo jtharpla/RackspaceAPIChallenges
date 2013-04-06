@@ -52,7 +52,7 @@ print "Uploading {0} to container \"{1}\"...".format(args.sourcefolderpath, args
 try:
     upload_key, total_bytes = cf.upload_folder(args.sourcefolderpath, args.destcontainername)
 except:
-    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"".format(args.sourcefolderpath, args.destcontainername)
+    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"\n".format(args.sourcefolderpath, args.destcontainername)
     sys.exit(1)
  
 # Monitor and report progress of upload.. 
@@ -67,5 +67,5 @@ if uploaded_bytes == total_bytes:
     # One more check, make sure all the bits got there
     print "Upload of {0} to container \"{1}\" complete!".format(args.sourcefolderpath, args.destcontainername)
 else:
-    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"".format(args.sourcefolderpath, args.destcontainername)
+    print >> sys.stderr, "ERROR: Unable to upload {0} to container named \"{1}\"\n".format(args.sourcefolderpath, args.destcontainername)
     sys.exit(1)

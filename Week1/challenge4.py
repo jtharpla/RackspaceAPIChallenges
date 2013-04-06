@@ -42,19 +42,19 @@ dns = pyrax.cloud_dns
 # Verify domain.tld is a valid Cloud DNS domain
 if args.fqdn.count('.') != 2:
     # FQDN is not in the format of rec.domain.tld
-    print >> sys.stderr, "ERROR: FQDN {} is not in a valid rec.domain.tld format".format(args.fqdn)
+    print >> sys.stderr, "ERROR: FQDN {} is not in a valid rec.domain.tld format\n".format(args.fqdn)
     sys.exit(1)
 myrecname, mydomainname = args.fqdn.split('.', 1)
 try:
     mydomain = dns.findall(name=mydomainname)[0] # .findall() returns a list, just using the first result
 except:
-    print >> sys.stderr, "ERROR: Unable to find domain {} in Cloud DNS".format(mydomainname)
+    print >> sys.stderr, "ERROR: Unable to find domain {} in Cloud DNS\n".format(mydomainname)
     sys.exit(1)
 
 # Verify IP address is in the correct format
 if args.ipaddr.count('.') != 3:
     # Not in a.b.c.d IP address format
-    print >> sys.stderr, "ERROR: {} is not a valid IP address".format(args.ipaddr)
+    print >> sys.stderr, "ERROR: {} is not a valid IP address\n".format(args.ipaddr)
     sys.exit(1)
     
 # Could also check that each octet is a valid octet, but this is probably enough
@@ -68,7 +68,7 @@ rec = [{
 try:
     mydomain.add_records(rec)
 except:
-    print >> sys.stderr, "ERROR: Unable to add record for {0} pointing to IP address {1}".format(args.fqdn, args.ipaddr)
+    print >> sys.stderr, "ERROR: Unable to add record for {0} pointing to IP address {1}\n".format(args.fqdn, args.ipaddr)
     sys.exit(1)
 
-print "Successfully added new A record to {0} for {1} pointing to IP address {2}".format(mydomainname, args.fqdn, args.ipaddr)
+print "Successfully added new A record to {0} for {1} pointing to IP address {2}\n".format(mydomainname, args.fqdn, args.ipaddr)

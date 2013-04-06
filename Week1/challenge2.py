@@ -78,11 +78,11 @@ for server in cs.servers.list():
             newimageid = server.create_image(imagename)
             break # We're done, no need to iterate over the rest of the list :-)
         except:
-            print >> sys.stderr, "ERROR: Unable to create image of ", source_servername, "\n"
+            print >> sys.stderr, "ERROR: Unable to create image of " + source_servername + "\n"
             sys.exit(1)
  
 if not newimageid:
-    print >> sys.stderr, "ERROR: Unable to create image of ", source_servername, "\n"
+    print >> sys.stderr, "ERROR: Unable to create image of " + source_servername + "\n"
     sys.exit(1)
 
 # And now we wait...but only for up to a half hour (= 60 attempts @ every 30 secs each)
@@ -92,7 +92,7 @@ newimage.get() # Need to refresh to update status
 
 # Abort if we do not have a good image
 if newimage.status != 'ACTIVE':
-    print >> sys.stderr, "ERROR: Creation of image named ", imagename, " failed\n"
+    print >> sys.stderr, "ERROR: Creation of image named " + imagename + " failed\n"
     sys.exit(1)
 
 # Get flavor of the source server
