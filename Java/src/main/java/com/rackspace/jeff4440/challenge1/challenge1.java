@@ -24,7 +24,6 @@ public class challenge1 {
 	 
 	 // Constants
 	 private static final String POLL_PERIOD_THIRTY_SECONDS = String.valueOf(SECONDS.toMillis(30));
-	 private static final String[] myservernames = {"web1", "web2", "web3"};
 	 
 	 public static void main(String[] args) {
 		 challenge1 challenge1 = new challenge1();
@@ -52,16 +51,19 @@ public class challenge1 {
 		 // This method will continue to poll for the server status and won't return until this server is ACTIVE
 		 // If you want to know what's happening during the polling, enable logging. See
 		 // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
-		 Set<? extends NodeMetadata> nodes = compute.createNodesInGroup("web1", 1, template);
+		 Set<? extends NodeMetadata> nodes = compute.createNodesInGroup("web", 3, template);
 
-		 NodeMetadata nodeMetadata = nodes.iterator().next();
-		 String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
-
-		 System.out.println(" " + nodeMetadata);
-		 System.out.println(" Login: ssh " + nodeMetadata.getCredentials().getUser() + "@" + publicAddress);
-		 System.out.println(" Password: " + nodeMetadata.getCredentials().getPassword());
+		 for (NodeMetadata nodeMetadata : nodes) {
+			 // Loop for each node created and print the details
+			 
+			 String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();  
+			 	// Only the IPv4 address seems to be returned by getPublicAddress() anyhow
+			 
+			 System.out.println(nodeMetadata.getName() + ":");
+			 System.out.println("\tIP addresses: " + publicAddress);
+			 System.out.println("\tAdmin password: " + nodeMetadata.getCredentials().getPassword());
+		 }
 	 }
-
 
 	  
 	 private void init() {
