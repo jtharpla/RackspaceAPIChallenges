@@ -1,4 +1,18 @@
-package com.rackspace.jeff4440.challenge1;
+/**
+ * Copyright 2013 Jeff Tharp
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License
+ */
+
+package com.rackspace.jeff4440.challenges;
 
 import java.util.Set;
 import java.util.Properties;
@@ -18,6 +32,23 @@ import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.domain.Location;
+
+/**
+ * API Challenge 1: Write a script that builds three 512 MB Cloud Servers that
+ * following a similar naming convention. (ie., web1, web2, web3)
+ * and returns the IP and login credentials for each server. Use
+ * any image you want.
+ *
+ * Assumptions:
+ * .rackspace_cloud_credentials is a file in ini format with a
+ * single section. Format is as follows:
+ *
+ * [rackspace_cloud]
+ * username=<cloud account username>
+ * api_key=<cloud account api key>
+ *
+ * @author Jeff Tharp, Managed Cloud
+ */
 
 public class challenge1 {
 	 private ComputeService compute;
@@ -39,14 +70,21 @@ public class challenge1 {
 		 System.exit(0);
 	 }
 	 
+	 /**
+	  * Creates 3 servers using a common naming scheme, then prints the details
+	  * on how to access these (IP address and admin password)
+	  * 
+	  * @throws RunNodesException
+	  * @throws TimeoutException
+	  */
 	 private void createServers() throws RunNodesException, TimeoutException {
 		 Template template = compute.templateBuilder()
 				 .locationId(getLocationId())
-				 .fromHardware(getHardware())
-		         .fromImage(getImage())
+				 .fromHardware(getHardware()) // 512 MB Flavor
+		         .fromImage(getImage()) // Ubuntu 12.04 Image
 		         .build();
 
-		 System.out.println("Create Server");
+		 System.out.println("Creating servers, please wait...");
 
 		 // This method will continue to poll for the server status and won't return until this server is ACTIVE
 		 // If you want to know what's happening during the polling, enable logging. See
@@ -65,7 +103,11 @@ public class challenge1 {
 		 }
 	 }
 
-	  
+	 /**
+	  * Reads Rackspace API credentials from .rackspace_cloud_credentials ini file
+	  * in users home directory, and then creates a new ComputeService object using
+	  * these credentials.
+	  */
 	 private void init() {
 		 Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			 public void uncaughtException(Thread t, Throwable e) {
@@ -105,10 +147,10 @@ public class challenge1 {
 	 }
 	 
 	 /**
-	 * This method uses the generic ComputeService.listAssignableLocations() to find the location.
-	 *
-	 * @return The first available Location
-	 */
+	  * This method uses the generic ComputeService.listAssignableLocations() to find the location.
+	  *
+	  * @return The first available Location
+	  */
 	 private String getLocationId() {
 		 Set<? extends Location> locations = compute.listAssignableLocations();
 		 return locations.iterator().next().getId();
@@ -117,7 +159,7 @@ public class challenge1 {
 	 /**
 	 * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
 	 *
-	 * @return The Hardware with 512 MB of RAM
+	 * @return The Hardware flavor with 512 MB of RAM
 	 */
 	 private Hardware getHardware() {
 		 Set<? extends Hardware> profiles = compute.listHardwareProfiles();
@@ -138,10 +180,10 @@ public class challenge1 {
 	 }
 
 	 /**
-	 * This method uses the generic ComputeService.listImages() to find the image.
-	 *
-	 * @return An Ubuntu 12.04 Image
-	 */
+	  * This method uses the generic ComputeService.listImages() to find the image.
+	  *
+	  * @return An Ubuntu 12.04 Image
+	  */
 	 private Image getImage() {
 		 Set<? extends Image> images = compute.listImages();
 	     Image result = null;
