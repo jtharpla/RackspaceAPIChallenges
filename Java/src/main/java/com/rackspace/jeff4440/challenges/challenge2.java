@@ -61,6 +61,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class challenge2 {
 	 private ComputeService compute;
+	 private Image sourceimage;
 	 
 	 // Constants
 	 private static final String POLL_PERIOD_THIRTY_SECONDS = String.valueOf(SECONDS.toMillis(30));
@@ -70,15 +71,8 @@ public class challenge2 {
 		 
 		 try {
 			 challenge2.init();
-			 Image myimage = challenge2.imageServer();
-			 System.out.println("Image ID: " + myimage.getProviderId() + " and status " + myimage.getStatus());
-
-			 if (myimage != null && myimage.getStatus().equals("AVAILABLE")) {
-				 challenge2.cloneServer(myimage); 
-			 } else {
-				 System.err.println("ERROR: " + myimage.getName() + " has status " + myimage.getStatus());
-				 System.exit(1);
-			 }
+			 challenge2.imageServer();
+			 challenge2.cloneServer(); 
 		 }
 		 catch (Exception e) {
 			 e.printStackTrace();
@@ -90,10 +84,8 @@ public class challenge2 {
 	 /**
 	  * Creates an image of the first server in the group with the designated 
 	  * prefix.
-	  * 
-	  * @return The new Image
 	  */
-	 private Image imageServer() {
+	 private void imageServer() {
 		 // Need to determine node id of first server in group with designated
 		 // prefix (aka web1, but because jclouds doesn't work that way, this
 		 // is a bit more involved)
@@ -106,16 +98,13 @@ public class challenge2 {
 		 ImageTemplate imagetemplate = glance.buildImageTemplateFromNode(imagename, sourcenode.getId());
 		 try{
 			 System.out.println("Creating image of " + sourcenode.getName() + " named " + imagename + ", please wait...");
-			 return glance.createImage(imagetemplate).get();
+			 sourceimage = glance.createImage(imagetemplate).get();
 		 }
 		 catch (Exception e) {
 			 System.err.println("ERROR: Unable to create image named " + imagename + " from server " + sourcenode.getName());
 			 System.err.println(e);
 			 System.exit(1);
 		 }
-		 
-		 // We'll never reach here, as we exit if the image fails
-		 return null;
 	 }
 	 
 	 /**
@@ -125,11 +114,19 @@ public class challenge2 {
 	  * @throws RunNodesException
 	  * @throws TimeoutException
 	  */
-	 private void cloneServer(Image sourceimage) throws RunNodesException, TimeoutException{
+	 private void cloneServer() throws RunNodesException, TimeoutException{
+		 // This is ugly...the list of images is apparently cached when 
+		 // getComputeService is called.  Thus in order to use the new image
+		 // we have to refresh compute
+		 compute = compute.getContext().getComputeService();
+		 
+		 Image myimage = compute.getImage(sourceimage.getId());
+		 System.out.println("Found image named \"" + myimage.getName() + "\" with status " + myimage.getStatus());
+		 
 		 Template template = compute.templateBuilder()
+				 .fromImage(myimage)
 				 .locationId(getLocationId())
 				 .fromHardware(getHardware()) // 512 MB Flavor
-		         .imageId(sourceimage.getProviderId()) // Use the source image
 		         .build();
 
 		 System.out.println("Cloning server, please wait...");
