@@ -40,6 +40,9 @@ import org.jclouds.domain.Location;
 import org.jclouds.util.Preconditions2;
 
 import com.google.common.base.Predicate;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * API Challenge 2: Write a script that clones a server (takes an image and 
@@ -68,12 +71,14 @@ public class challenge2 {
 		 try {
 			 challenge2.init();
 			 Image myimage = challenge2.imageServer();
-			 //if (myimage != null && myimage.getStatus().equals("AVAILABLE")) {
+			 System.out.println("Image ID: " + myimage.getProviderId() + " and status " + myimage.getStatus());
+
+			 if (myimage != null && myimage.getStatus().equals("AVAILABLE")) {
 				 challenge2.cloneServer(myimage); 
-			 //} else {
-			//	 System.err.println("ERROR: " + myimage.getName() + " has status " + myimage.getStatus());
-			//	 System.exit(1);
-			 //}
+			 } else {
+				 System.err.println("ERROR: " + myimage.getName() + " has status " + myimage.getStatus());
+				 System.exit(1);
+			 }
 		 }
 		 catch (Exception e) {
 			 e.printStackTrace();
@@ -123,7 +128,7 @@ public class challenge2 {
 	 private void cloneServer(Image sourceimage) throws RunNodesException, TimeoutException{
 		 Template template = compute.templateBuilder()
 				 .locationId(getLocationId())
-				 //.fromHardware(getHardware()) // 512 MB Flavor
+				 .fromHardware(getHardware()) // 512 MB Flavor
 		         .imageId(sourceimage.getProviderId()) // Use the source image
 		         .build();
 
