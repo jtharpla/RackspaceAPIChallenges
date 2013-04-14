@@ -49,17 +49,17 @@ if not containerExists:
     try:
         mycontainer = cf.create_container(args.containername)
     except:
-        print >> sys.stderr, "ERROR: Unable to create container named \"{}\"".format(args.containername)
+        print >> sys.stderr, "ERROR: Unable to create container named \"{}\"\n".format(args.containername)
         sys.exit(1)
 else:
     # Already exists, let the user know this
-    print >> sys.stderr, "WARNING: container named \"{}\" already exists, making public".format(args.containername)
+    print >> sys.stderr, "WARNING: container named \"{}\" already exists, making public\n".format(args.containername)
     mycontainer = cf.get_container(args.containername)
     
 # Now make container CDN enabled.
 if mycontainer.cdn_enabled:
     # Already CDN enabled, nothing to do
-    print >> sys.stderr, "ERROR: container named \"{}\" is already CDN enabled, nothing to do!".format(args.containername)
+    print >> sys.stderr, "ERROR: container named \"{}\" is already CDN enabled, nothing to do!\n".format(args.containername)
     sys.exit(1)
 else:
     # Ok, enough sanity checking, lets make the container public, shall we?
@@ -67,7 +67,7 @@ else:
         mycontainer.make_public(ttl=900)
         mycdnmetadata = cf.get_container_cdn_metadata(mycontainer)
     except:
-        print >> sys.stderr, "ERROR: Unable to make container \"{}\" public!".format(args.containername)
+        print >> sys.stderr, "ERROR: Unable to make container \"{}\" public!\n".format(args.containername)
         sys.exit(1)
     
     # Successfully made public, print the details
