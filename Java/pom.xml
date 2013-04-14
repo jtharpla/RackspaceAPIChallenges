@@ -16,6 +16,11 @@
   		<artifactId>jclouds-allblobstore</artifactId>
   		<version>1.5.9</version>
   	</dependency>
+  	<dependency>
+  		<groupId>net.sourceforge.argparse4j</groupId>
+  		<artifactId>argparse4j</artifactId>
+  		<version>0.4.0</version>
+  	</dependency>
   </dependencies>
   <build>
   	<plugins>
