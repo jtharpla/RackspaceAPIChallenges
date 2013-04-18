@@ -9,17 +9,22 @@
   	<dependency>
   		<groupId>org.jclouds</groupId>
   		<artifactId>jclouds-allcompute</artifactId>
-  		<version>1.5.9</version>
+  		<version>1.5.10</version>
   	</dependency>
   	<dependency>
   		<groupId>org.jclouds</groupId>
   		<artifactId>jclouds-allblobstore</artifactId>
-  		<version>1.5.9</version>
+  		<version>1.5.10</version>
   	</dependency>
   	<dependency>
   		<groupId>net.sourceforge.argparse4j</groupId>
   		<artifactId>argparse4j</artifactId>
   		<version>0.4.0</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.jclouds</groupId>
+  		<artifactId>jclouds-allloadbalancer</artifactId>
+  		<version>1.5.10</version>
   	</dependency>
   </dependencies>
   <build>
