@@ -45,7 +45,7 @@ import org.jclouds.rest.RestContext;
 import com.google.common.base.Predicate;
 
 /**
- * API Challenge 1: Write a script that will create 2 Cloud Servers and add 
+ * API Challenge 7: Write a script that will create 2 Cloud Servers and add 
  * them as nodes to a new Cloud Load Balancer.
  *  
  * Assumptions:
@@ -128,12 +128,12 @@ public class challenge7 {
 		// Create the load balancer
 		System.out.println("\nCreating load balancer...");
 		LoadBalancerMetadata newlb = clb.createLoadBalancerInLocation(
-										getLocation(), 	// First available location
-										"c7-lb-http",  	// Name of new load balancer
-										"HTTP", 		// Protocol
-										80, 			// Port of load balancer
-										80, 			// Port of backend nodes
-										nodes);			// Set of nodes to add
+				getLocation(), 	// First available location
+				"c7-lb-http",  	// Name of new load balancer
+				"HTTP", 		// Protocol
+				80, 			// Port of load balancer
+				80, 			// Port of backend nodes
+				nodes);			// Set of nodes to add
 		
 		// Determine the newly assigned virtual IP
 		String vip = newlb.getAddresses().iterator().next();
@@ -261,7 +261,13 @@ public class challenge7 {
 	     return result;
 	 }
 	 
-	 public static Predicate<ComputeMetadata> nameStartsWith(final String prefix) {
+	 /**
+	  * Creates a predicate for locating nodes whose names start with "prefix"
+	  * 
+	  * @param prefix
+	  * @return a predicate matching nodes whose names start with prefix
+	  */
+	 private static Predicate<ComputeMetadata> nameStartsWith(final String prefix) {
 		 Preconditions2.checkNotEmpty(prefix, "prefix must be defined");
 
 		 return new Predicate<ComputeMetadata>() {
@@ -281,7 +287,8 @@ public class challenge7 {
 	  * This method returns a comma separated list of the names in the set of nodes
 	  * passed to it
 	  * 
-	  * @return String nodeList
+	  * @param set of NodeMetadata objects representing the nodes
+	  * @return string containing a comma-separated list of nodes
 	  */
 	 private String getNodeList(Set<? extends NodeMetadata> nodes) {
 		 StringBuilder result = new StringBuilder();
