@@ -35,14 +35,9 @@ import org.jclouds.compute.domain.ImageTemplate;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.extensions.ImageExtension;
-import org.jclouds.compute.predicates.NodePredicates;
 import org.jclouds.domain.Location;
 import org.jclouds.util.Preconditions2;
-
 import com.google.common.base.Predicate;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * API Challenge 2: Write a script that clones a server (takes an image and 
@@ -62,6 +57,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class challenge2 {
 	 private ComputeService compute;
 	 private Image sourceimage;
+	 private Location sourcelocation;
 	 
 	 // Constants
 	 private static final String POLL_PERIOD_THIRTY_SECONDS = String.valueOf(SECONDS.toMillis(30));
@@ -92,6 +88,12 @@ public class challenge2 {
 		 Set<? extends NodeMetadata> nodes = compute.listNodesDetailsMatching(nameStartsWith("web"));
 		 NodeMetadata sourcenode = nodes.iterator().next(); // We just want the first node in the group
 		 
+		 // Determine the current location of the source node and store for
+		 // later when we need to create the clone node.  Also,
+		 // NodeMetaData.getLocation() returns a Location representing the HOST
+		 // Must call getParent() on that Location to get the data center/zone
+		 sourcelocation = sourcenode.getLocation().getParent();
+		 
 		 String imagename = "challenge2-" + sourcenode.getName() + "-image-" + getCurrentTimestamp();
 		 
 		 ImageExtension glance = compute.getImageExtension().get();
@@ -114,23 +116,17 @@ public class challenge2 {
 	  * @throws RunNodesException
 	  * @throws TimeoutException
 	  */
-	 private void cloneServer() throws RunNodesException, TimeoutException{
-		 // This is ugly...the list of images is apparently cached when 
-		 // getComputeService is called.  Thus in order to use the new image
-		 // we have to refresh compute
-		 compute = compute.getContext().getComputeService();
-		 
+	 private void cloneServer() throws RunNodesException, TimeoutException{ 
 		 Image myimage = compute.getImage(sourceimage.getId());
 		 System.out.println("Found image named \"" + myimage.getName() + "\" with status " + myimage.getStatus());
 		 
 		 Template template = compute.templateBuilder()
-				 .fromImage(myimage)
-				 .locationId(getLocationId())
+				 .locationId(sourcelocation.getId())
+				 .imageId(myimage.getProviderId())
 				 .fromHardware(getHardware()) // 512 MB Flavor
 		         .build();
 
 		 System.out.println("Cloning server, please wait...");
-
 		 // This method will continue to poll for the server status and won't return until this server is ACTIVE
 		 // If you want to know what's happening during the polling, enable logging. See
 		 // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
@@ -188,16 +184,6 @@ public class challenge2 {
 			 System.exit(1);
 		 }
 	 }
-	 
-	 /**
-	  * This method uses the generic ComputeService.listAssignableLocations() to find the location.
-	  *
-	  * @return The first available Location
-	  */
-	 private String getLocationId() {
-		 Set<? extends Location> locations = compute.listAssignableLocations();
-		 return locations.iterator().next().getId();
-	 }
 
 	 /**
 	 * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
@@ -217,29 +203,6 @@ public class challenge2 {
 	     if (result == null) {
 	    	 System.err.println("ERROR: Flavor with 512 MB of RAM not found. Using first flavor found\n");
 	         result = profiles.iterator().next();
-	     }
-
-	     return result;
-	 }
-
-	 /**
-	  * This method uses the generic ComputeService.listImages() to find the image.
-	  *
-	  * @return An Ubuntu 12.04 Image
-	  */
-	 private Image getImage() {
-		 Set<? extends Image> images = compute.listImages();
-	     Image result = null;
-
-	     for (Image image: images) {
-	    	 if (image.getOperatingSystem().getName().equals("Ubuntu 12.04 LTS (Precise Pangolin)")) {
-	    		 result = image;
-	         }
-	     }
-
-	     if (result == null) {
-	    	 System.err.println("ERROR: Image with Ubuntu 12.04 operating system not found. Using first image found.\n");
-	    	 result = images.iterator().next();
 	     }
 
 	     return result;
