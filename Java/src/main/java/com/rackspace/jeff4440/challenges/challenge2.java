@@ -44,7 +44,7 @@ import com.google.common.base.Predicate;
  *                deploys the image as a new server). Worth 2 Point
  *
  * Assumptions:
- *               A server named web1 exists, .rackspace_cloud_credentials is a 
+ *               A server named web-XXX exists, .rackspace_cloud_credentials is a 
  *               file in ini format with a single section. Format is as follows:
  *
  *                    [rackspace_cloud]
