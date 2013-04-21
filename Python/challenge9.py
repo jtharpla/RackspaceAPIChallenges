@@ -109,7 +109,7 @@ if myserver.status == 'ACTIVE' and myserver.networks:
         try:
             mydomain.add_records(rec)
         except:
-            print >> sys.stderr, "ERROR: Unable to add record for {0} pointing to IP address {1}\n".format(args.fqdn, args.ipaddr)
+            print >> sys.stderr, "ERROR: Unable to add record for {0} pointing to IP address {1}\n".format(args.fqdn, publicip)
             sys.exit(1)
     else:
         print >> sys.stderr, "ERROR: No valid IPv4 address found for server named {}\n".format(args.fqdn)
