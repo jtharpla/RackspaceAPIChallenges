@@ -41,7 +41,7 @@ import com.google.common.base.Predicate;
 
 /**
  * API Challenge 2: Write a script that clones a server (takes an image and 
- *                deploys the image as a new server). Worth 2 Point
+ *                deploys the image as a new server).
  *
  * Assumptions:
  *               A server named web-XXX exists, .rackspace_cloud_credentials is a 

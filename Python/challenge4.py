@@ -4,7 +4,6 @@
 #
 # API Challenge 3: Write a script that uses Cloud DNS to create a new A record
 #                  when passed a FQDN and IP address as arguments.
-#                  Worth 1 Point
 #
 # Assumptions:
 #               Passed FQDN (in the form of rec.domain.tld), and IP as arguments

@@ -5,7 +5,6 @@
 # API Challenge 5: Write a script that creates a Cloud Database instance. This
 #                 instance should contain at least one database, and the 
 #                 database should have at least one user that can connect to it.
-#                 Worth 1 Point
 #
 # Assumptions:
 #               .rackspace_cloud_credentials is a file in ini format

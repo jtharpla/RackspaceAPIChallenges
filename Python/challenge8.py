@@ -7,7 +7,6 @@
 #                 enable it, enable it to serve an index file, create an index
 #                 file object, upload the object to the container, and create
 #                 a CNAME record pointing to the CDN URL of the container.
-#                 Worth 3 Points
 #
 # Assumptions:
 #               Passed container name and cname fqdn as arguments

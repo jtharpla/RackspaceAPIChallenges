@@ -7,7 +7,7 @@
 #                  contents of the specified directory to the container
 #                 (or create it if it doesn't exist). The script should 
 #                 handle errors appropriately. (Check for invalid paths,
-#                 etc.) Worth 2 Points
+#                 etc.)
 #
 # Assumptions:
 #               Passed directory path, container name as arguments
