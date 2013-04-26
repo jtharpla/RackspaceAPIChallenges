@@ -57,7 +57,7 @@ args = parser.parse_args()
 
 
 # Get the credentials
-pyrax.set_credential_file(os.path.expanduser("~/.rackspace_cloud_credentials"))
+pyrax.set_credential_file(os.path.expanduser("~/.rackspace_cloud_credentials"), region='ORD')
 cs = pyrax.cloudservers
 clb = pyrax.cloud_loadbalancers
 dns = pyrax.cloud_dns
@@ -96,15 +96,22 @@ for i in range(1, num_of_servers + 1): # range is normally zero indexed
     myservernames.append(myrecname + server_prefix + str(i))
     
 # Verify that ssh key is a valid file
-    
+if not os.path.isfile(args.sshkey):
+    print >> sys.stderr, "ERROR: Unable to access SSH key {}\n".format(args.sshkey)
+    sys.exit(1)
+else:  
+    myfiles = {"/root/.ssh/authorized_keys": open(args.sshkey, 'r')}
+
 # Create the servers, store as an array of Server objects
 print "Creating servers..."
 for servername in myservernames:
     try:
-        myservers.append(cs.servers.create(servername, ubu_image.id, flavor_512.id))
+        myservers.append(cs.servers.create(servername, ubu_image.id, flavor_512.id, files=myfiles))
     except:
+        e = sys.exc_info()[0]
         print >> sys.stderr, "ERROR: Unable to create server named " + servername + "\n"
-    
+        print >> sys.stderr, "ERROR: {}\n".format(e)
+
 # Now loop through created servers, wait until each finishes building, then
 # display the name, ip address, and admin password
 for server in myservers:
