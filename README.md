@@ -18,7 +18,7 @@ in via Maven (see pom.xml for details.)
 
 Java solutions are located in 
 /Java/src/main/java/com/rackspace/jeff4440/challenges
-(sorry, this is Java convention)
+(sorry, this is a Java convention)
 
 Solutions are named challengeXX.java, each can be ran as an
 independent class.
@@ -28,8 +28,9 @@ Cloud DNS, so challenges involving these APIs were not attempted
 
 Note on challenge2 -- this currently fails to build a clone 
 server after the image is taken.  I reported this to the
-SDK Support team, who reported it does appear to be a caching
+SDK Support team, who confirmed it does appear to be a caching
 bug betwen the upper levels of the jClouds SDK implementation
 and the lower level Rackspace provider
-(see https://github.com/jclouds/jclouds/issues/1560)
-(example for this bug is based on my Challenge 2 :-) )
+(see https://github.com/jclouds/jclouds/issues/1560 and example
+ for this bug is based on my Challenge 2 with class names
+ changed to protect the innocent )
